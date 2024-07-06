@@ -7,12 +7,33 @@ import express from "express";
 import adminModel from "../lib/db/models/adminModel";
 import { HttpStatusCode } from "../types/http-status-code";
 import { compareHash, hash } from "../lib/hash";
+import jwt from "jsonwebtoken";
+import { expressjwt } from "express-jwt";
 
 config();
+
+const jwtMiddleware = expressjwt({
+  secret: process.env.JWT_SECRET_KEY || "",
+  algorithms: ["HS256"],
+  // @ts-ignore
+  getToken: (req) => {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.split(" ")[0] === "Bearer"
+    ) {
+      return req.headers.authorization.split(" ")[1];
+    } else if (req.query && req.query.token) {
+      return req.query.token;
+    }
+    return null;
+  }
+}).unless({ path: ["/login"] })
 
 server.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
 
 server.use(express.json());
+
+server.use(jwtMiddleware);
 
 const MONGODB_URI = process.env.MONGODB_URI || "";
 
@@ -27,10 +48,22 @@ server.post("/login", async (req, res) => {
     const isAdmin = await adminModel.findOne({ email });
 
     if (isAdmin) {
+      // const isValidPassword = await compareHash(password, isAdmin.password);
+
+      // if (!isValidPassword) {
+      //   return res.json({
+      //     message: "Credências Inválidas.",
+      //     status: HttpStatusCode.UNAUTHORIZED,
+      //   });
+      // }
+
+      const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY || "");
+
       return res.json({
         isAdmin: true,
         message: "Admin logado com sucesso.",
         status: HttpStatusCode.OK,
+        token,
       });
     }
 
@@ -76,6 +109,8 @@ server.post("/login", async (req, res) => {
 
 server.get("/users", async (req, res) => {
   const users = await userModel.find();
+
+  console.log(req.headers.authorization)
 
   res.json({ users, status: HttpStatusCode.OK });
 });
