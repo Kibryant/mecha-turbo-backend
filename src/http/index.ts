@@ -27,7 +27,7 @@ const jwtMiddleware = expressjwt({
     }
     return null;
   }
-}).unless({ path: ["/login"] })
+}).unless({ path: ["/login", "/login-adm"] })
 
 server.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
 
@@ -45,28 +45,6 @@ server.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const isAdmin = await adminModel.findOne({ email });
-
-    if (isAdmin) {
-      // const isValidPassword = await compareHash(password, isAdmin.password);
-
-      // if (!isValidPassword) {
-      //   return res.json({
-      //     message: "Credências Inválidas.",
-      //     status: HttpStatusCode.UNAUTHORIZED,
-      //   });
-      // }
-
-      const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY || "");
-
-      return res.json({
-        isAdmin: true,
-        message: "Admin logado com sucesso.",
-        status: HttpStatusCode.OK,
-        token,
-      });
-    }
-
     const user = await userModel.findOne({ email });
 
     if (!user) {
@@ -87,10 +65,13 @@ server.post("/login", async (req, res) => {
     }
 
     res.json({
-      isAdmin: false,
       message: "Usuário logado com sucesso.",
       status: HttpStatusCode.OK,
-      expirationDate: user.expirationDate,
+      user: {
+        name: user.name,
+        email: user.email,
+        expirationDate: user.expirationDate,
+      }
     });
   } catch (error) {
     if (error instanceof Error) {
@@ -107,6 +88,61 @@ server.post("/login", async (req, res) => {
   }
 });
 
+server.post("/login-adm", async (req, res) => {
+  const { email, password, accessCode } = req.body;
+
+  try {
+    const admin = await adminModel.findOne({ email });
+
+    if (!admin) {
+      res.json({
+        message: "Credências Inválidas.",
+        status: HttpStatusCode.NOT_FOUND,
+      });
+      return;
+    }
+
+    const isValidPassword = await compareHash(password, admin.password);
+
+    if (!isValidPassword) {
+      return res.json({
+        message: "Credências Inválidas.",
+        status: HttpStatusCode.UNAUTHORIZED,
+      });
+    }
+
+    const isValidAccessCode = await compareHash(accessCode, admin.accessCode);
+
+    if (!isValidAccessCode) {
+      return res.json({
+        message: "Credências Inválidas.",
+        status: HttpStatusCode.UNAUTHORIZED,
+      });
+    }
+
+    const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY || "", {});
+
+    res.json({
+      message: "Administrador logado com sucesso.",
+      status: HttpStatusCode.OK,
+      token,
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      res.json({
+        message: error.message,
+        status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      });
+    }
+
+    res.json({
+      message: "Erro interno.",
+      status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    });
+  }
+});
+
+
 server.get("/users", async (req, res) => {
   const users = await userModel.find();
 
@@ -116,7 +152,7 @@ server.get("/users", async (req, res) => {
 });
 
 server.post("/add-user", async (req, res) => {
-  const { email, password, purchaseDate, expirationDate } = req.body;
+  const { name, email, password, purchaseDate, expirationDate } = req.body;
 
   // const purchaseDate = new Date();
   // const expiryDate = new Date(purchaseDate);
@@ -126,6 +162,7 @@ server.post("/add-user", async (req, res) => {
     const hashedPassword = await hash(password);
 
     const newUser = await userModel.create({
+      name,
       email,
       password: hashedPassword,
       purchaseDate,
@@ -160,7 +197,7 @@ server.delete("/delete-user/:id", async (req, res) => {
 
 server.put("/update-user/:id", async (req, res) => {
   const { id } = req.params;
-  const { email, purchaseDate, expirationDate } = req.body;
+  const { name, email, purchaseDate, expirationDate } = req.body;
 
   const user = await userModel.findById(id);
 
@@ -171,14 +208,50 @@ server.put("/update-user/:id", async (req, res) => {
     });
   }
 
-  user.email = email;
-  user.purchaseDate = purchaseDate;
-  user.expirationDate = expirationDate;
+  user.name = name || user.name;
+  user.email = email || user.email;
+  user.purchaseDate = purchaseDate || user.purchaseDate;
+  user.expirationDate = expirationDate || user.expirationDate;
 
   await user.save();
 
   res.json({ user, status: HttpStatusCode.OK });
 });
+
+server.put("/update-admin", async (req, res) => {
+  const { oldEmail, email, password, accessCode } = req.body;
+
+  console.log(oldEmail, email, password, accessCode)
+
+  let hashedPassword: string | null = null;
+  let hashedAccessCode: string | null = null;
+
+  const admin = await adminModel.findOne({ email: oldEmail });
+
+  if (!admin) {
+    return res.json({
+      message: "Administrador não encontrado.",
+      status: HttpStatusCode.NOT_FOUND,
+    });
+  }
+
+  if (password) {
+    hashedPassword = await hash(password);
+  }
+
+  if (accessCode) {
+    hashedAccessCode = await hash(accessCode);
+  }
+
+  admin.email = email || admin.email;
+  admin.password = hashedPassword || admin.password;
+  admin.accessCode = hashedAccessCode || admin.accessCode
+
+  await admin.save();
+
+  res.json({ message: "Administrador atualizado com sucesso!", status: HttpStatusCode.OK });
+});
+
 
 server.listen(3333, () => {
   console.log("Server listening on port 3333");
