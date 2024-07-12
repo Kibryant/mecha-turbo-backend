@@ -2,20 +2,19 @@ import cors from "cors";
 import { connect } from "../lib/db/connect";
 import userModel from "../lib/db/models/userModel";
 import { server } from "../lib/server";
-import { config } from "dotenv";
 import express from "express";
 import adminModel from "../lib/db/models/adminModel";
 import { HttpStatusCode } from "../types/http-status-code";
 import { compareHash, hash } from "../lib/hash";
 import jwt from "jsonwebtoken";
 import { expressjwt } from "express-jwt";
-
-config();
+import { DataWebhookHotmart } from "../types/data-webhook-hotmart";
+import { env } from "../lib/env";
 
 const jwtMiddleware = expressjwt({
-  secret: process.env.JWT_SECRET_KEY || "",
+  secret: env.JWT_SECRET_KEY || "",
   algorithms: ["HS256"],
-  // @ts-ignore
+  // @ts-expect-error - The types are wrong
   getToken: (req) => {
     if (
       req.headers.authorization &&
@@ -27,7 +26,7 @@ const jwtMiddleware = expressjwt({
     }
     return null;
   }
-}).unless({ path: ["/login", "/login-adm"] })
+}).unless({ path: ["/login", "/login-adm", "/webhook-hotmart"] })
 
 server.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
 
@@ -35,10 +34,64 @@ server.use(express.json());
 
 server.use(jwtMiddleware);
 
-const MONGODB_URI = process.env.MONGODB_URI || "";
+const MONGODB_URI = env.MONGODB_URI || "";
 
 connect(MONGODB_URI).then(() => {
   console.log("Connected to MongoDB");
+});
+
+server.post("/webhook-hotmart", async (req, res) => {
+  const hotmartReceivedHottok = req.headers["x-hotmart-hottok"];
+
+  if (hotmartReceivedHottok !== env.HOTMART_HOTTOK) {
+    return res.json({
+      message: "Hottok inválido.",
+      status: HttpStatusCode.UNAUTHORIZED
+    });
+  }
+
+  const { data }: DataWebhookHotmart = req.body;
+
+  const { buyer } = data;
+
+  const { name, email, checkout_phone } = buyer;
+
+  const purchaseDate = new Date().toLocaleDateString("pt-BR");
+
+  const expirationDate = new Date(
+    new Date().setFullYear(new Date().getFullYear() + 1)
+  ).toLocaleDateString("pt-BR");
+
+  try{
+    const hashedPassword = await hash(checkout_phone);
+
+    const newUser = await userModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      purchaseDate,
+      expirationDate,
+    });
+
+    await newUser.save();
+
+    res.json({ user: newUser, status: HttpStatusCode.CREATED });
+  } catch(error){
+    if (error instanceof Error) {
+      res.json({
+        message: error.message,
+        status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+      });
+    }
+
+    res.json({
+      message: "Erro interno.",
+      status: HttpStatusCode.INTERNAL_SERVER_ERROR,
+    });
+  }
+
+
+  res.json({ message: "Webhook received", status: HttpStatusCode.OK });
 });
 
 server.post("/login", async (req, res) => {
@@ -120,7 +173,7 @@ server.post("/login-adm", async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ email }, process.env.JWT_SECRET_KEY || "", {});
+    const token = jwt.sign({ email }, env.JWT_SECRET_KEY || "", {});
 
     res.json({
       message: "Administrador logado com sucesso.",
@@ -142,7 +195,6 @@ server.post("/login-adm", async (req, res) => {
   }
 });
 
-
 server.get("/users", async (req, res) => {
   const users = await userModel.find();
 
@@ -153,10 +205,6 @@ server.get("/users", async (req, res) => {
 
 server.post("/add-user", async (req, res) => {
   const { name, email, password, purchaseDate, expirationDate } = req.body;
-
-  // const purchaseDate = new Date();
-  // const expiryDate = new Date(purchaseDate);
-  // expiryDate.setFullYear(purchaseDate.getFullYear() + 1);
 
   try {
     const hashedPassword = await hash(password);
