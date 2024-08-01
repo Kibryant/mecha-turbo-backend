@@ -56,11 +56,13 @@ server.post("/webhook-hotmart", async (req, res) => {
 
   const { name, email, checkout_phone } = buyer;
 
-  const purchaseDate = new Date().toLocaleDateString("pt-BR");
+  const purchaseDate = new Date()
 
   const expirationDate = new Date(
     new Date().setFullYear(new Date().getFullYear() + 1)
-  ).toLocaleDateString("pt-BR");
+  )
+
+  console.log(name, email, checkout_phone, purchaseDate, expirationDate);
 
   try{
     const hashedPassword = await hash(checkout_phone);
@@ -75,23 +77,22 @@ server.post("/webhook-hotmart", async (req, res) => {
 
     await newUser.save();
 
-    res.json({ user: newUser, status: HttpStatusCode.CREATED });
+    console.log("Usuário cadastrado com sucesso!");
+
+    return res.json({ user: newUser, status: HttpStatusCode.CREATED });
   } catch(error){
     if (error instanceof Error) {
-      res.json({
+      return res.json({
         message: error.message,
         status: HttpStatusCode.INTERNAL_SERVER_ERROR,
       });
     }
 
-    res.json({
+    return res.json({
       message: "Erro interno.",
       status: HttpStatusCode.INTERNAL_SERVER_ERROR,
     });
   }
-
-
-  res.json({ message: "Webhook received", status: HttpStatusCode.OK });
 });
 
 server.post("/login", async (req, res) => {
