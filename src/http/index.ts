@@ -34,7 +34,7 @@ server.use(express.json());
 
 server.use(jwtMiddleware);
 
-const MONGODB_URI = env.MONGODB_URI || "";
+const MONGODB_URI = env.MONGODB_URI;
 
 connect(MONGODB_URI).then(() => {
   console.log("Connected to MongoDB");
@@ -269,8 +269,6 @@ server.put("/update-user/:id", async (req, res) => {
 
 server.put("/update-admin", async (req, res) => {
   const { oldEmail, email, password, accessCode } = req.body;
-
-  console.log(oldEmail, email, password, accessCode)
 
   let hashedPassword: string | null = null;
   let hashedAccessCode: string | null = null;
