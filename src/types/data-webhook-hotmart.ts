@@ -1,9 +1,11 @@
-export interface DataWebhookHotmart {
-  data: {
-    buyer: {
-      name: string;
-      email: string;
-      checkout_phone: string;
-    };
-  }
+interface DataWebhookHotmart {
+    data: {
+        buyer: {
+            name: string;
+            email: string;
+            checkout_phone: string;
+        };
+    }
 }
+
+export { DataWebhookHotmart }

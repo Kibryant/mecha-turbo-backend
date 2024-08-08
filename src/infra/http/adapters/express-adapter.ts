@@ -2,17 +2,18 @@ import { HttpContext, HttpRequest } from "../../../core/contracts/http-context";
 import { Request, Response } from 'express';
 import { HttpStatusCode } from "../../../types/http-status-code";
 
-class ExpressAdapter<T> implements HttpContext<T> {
-    constructor(private request: Request, private response: Response) {}
+class ExpressAdapter<Input, Output> implements HttpContext<Input, Output> {
+    constructor(private request: Request, private response: Response) { }
 
-    getRequest<T>(): HttpRequest<T> {
+    getRequest(): HttpRequest<Input> {
         return {
             body: this.request.body,
-            params: this.request.params
+            params: this.request.params,
+            headers: this.request.headers
         }
     }
 
-    sendResponse<T>(status: HttpStatusCode, data: T | null): void {
+    sendResponse(status: HttpStatusCode, data: Output): void {
         this.response.status(status).json(data);
     }
 }

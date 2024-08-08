@@ -199,8 +199,6 @@ server.post("/login-adm", async (req, res) => {
 server.get("/users", async (req, res) => {
   const users = await userModel.find();
 
-  console.log(req.headers.authorization)
-
   res.json({ users, status: HttpStatusCode.OK });
 });
 
