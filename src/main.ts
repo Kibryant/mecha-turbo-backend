@@ -1,19 +1,14 @@
 import { CreateUserDto } from "./core/domain/dtos/create-user-dto";
-import { LoginAdminDto } from "./core/domain/dtos/login-admin-dto";
-import { LoginAdminResponse } from "./core/domain/dtos/login-admin-response";
-import { LoginUserDto } from "./core/domain/dtos/login-user-dto";
-import { UpdateAdminDto } from "./core/domain/dtos/update-admin-dto";
-import { UpdateAdminResponse } from "./core/domain/dtos/update-admin-response";
-import { UpdateUserDto } from "./core/domain/dtos/update-user-dto";
-import { User } from "./core/domain/entities/user";
-import { DataWebhookHotmart } from "./types/data-webhook-hotmart";
-
 import { connect } from "./infra/database/connection/connect";
 import { MongoAdminRepository } from "./infra/database/repository/mongo-admin-repository";
 import { MongoUserRepository } from "./infra/database/repository/mongo-user-repository";
-import { ExpressAdapter } from "./infra/http/adapters/express-adapter";
-import { AdminController } from "./infra/http/controller/admin-controller";
-import { UserController } from "./infra/http/controller/user-controller";
+import { RequestAdapter } from "./infra/http/adapters/request-adapter";
+import { ResponseAdapter } from "./infra/http/adapters/response-adapter";
+import { createUserController } from "./infra/http/controller/user/create-user";
+import { CreateUserResponseDto } from "./infra/http/controller/user/create-user/create-user-response-dto";
+import { webhookHotmartController } from "./infra/http/controller/user/webhook-hotmart";
+import { WebhookHotmartRequestDto } from "./infra/http/controller/user/webhook-hotmart/webhook-hotmart-request-dto";
+import { WebhookHotmartResponseDto } from "./infra/http/controller/user/webhook-hotmart/webhook-hotmart-response-dto";
 import { server } from "./infra/http/server";
 import { Hash } from "./infra/security/hash";
 import { Jwt } from "./infra/security/jwt";
@@ -34,50 +29,50 @@ const mongoAdminRepository = new MongoAdminRepository();
 const hashService = new Hash();
 const jwtService = new Jwt();
 
-const userController = new UserController(mongoUserRepository, hashService);
-const adminController = new AdminController(mongoAdminRepository, hashService, jwtService);
-
 function setupRoutes() {
     server.post("/webhook-hotmart", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<DataWebhookHotmart, User>(req, res);
-        userController.webhookHotmart(expressAdapter);
+        const requestAdapter = new RequestAdapter<WebhookHotmartRequestDto>(req);
+        const responseAdapter = new ResponseAdapter<WebhookHotmartResponseDto>(res);
+
+        webhookHotmartController.handle(requestAdapter, responseAdapter);
     });
 
-    server.post("/login", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<LoginUserDto, User>(req, res);
-        userController.login(expressAdapter);
-    });
+    // server.post("/login", async (req, res) => {
+    //     const expressAdapter = new ExpressAdapter<LoginUserDto, User>(req, res);
+    //     userController.login(expressAdapter);
+    // });
 
-    server.post("/login-adm", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<LoginAdminDto, LoginAdminResponse>(req, res);
-        adminController.login(expressAdapter);
-    });
+    // server.post("/login-adm", async (req, res) => {
+    //     const expressAdapter = new ExpressAdapter<LoginAdminDto, LoginAdminResponse>(req, res);
+    //     adminController.login(expressAdapter);
+    // });
 
-    server.get("/users", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<null, User[]>(req, res);
-        userController.findAll(expressAdapter);
-    });
+    // server.get("/users", async (req, res) => {
+    //     const expressAdapter = new ExpressAdapter<null, User[]>(req, res);
+    //     userController.findAll(expressAdapter);
+    // });
 
     server.post("/add-user", async (req, res) => {
-        console.log(req.body);
-        const expressAdapter = new ExpressAdapter<CreateUserDto, User>(req, res);
-        userController.create(expressAdapter);
+        const requestAdapter = new RequestAdapter<CreateUserDto>(req);
+        const responseAdapter = new ResponseAdapter<CreateUserResponseDto>(res);
+
+        createUserController.handle(requestAdapter, responseAdapter);
     });
 
-    server.put("/update-user/:id", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<UpdateUserDto, User>(req, res);
-        userController.update(expressAdapter);
-    });
+    // server.put("/update-user/:id", async (req, res) => {
+    //     const expressAdapter = new ExpressAdapter<UpdateUserDto, User>(req, res);
+    //     userController.update(expressAdapter);
+    // });
 
-    server.put("/update-admin", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<UpdateAdminDto, UpdateAdminResponse>(req, res);
-        adminController.update(expressAdapter);
-    });
+    // server.put("/update-admin", async (req, res) => {
+    //     const expressAdapter = new ExpressAdapter<UpdateAdminDto, UpdateAdminResponse>(req, res);
+    //     adminController.update(expressAdapter);
+    // });
 
-    server.delete("/delete-user/:id", async (req, res) => {
-        const expressAdapter = new ExpressAdapter<null, null>(req, res);
-        userController.delete(expressAdapter);
-    });
+    // server.delete("/delete-user/:id", async (req, res) => {
+    //     const expressAdapter = new ExpressAdapter<null, null>(req, res);
+    //     userController.delete(expressAdapter);
+    // });
 }
 
 function startServer() {

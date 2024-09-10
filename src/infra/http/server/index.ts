@@ -1,6 +1,6 @@
 import express from "express";
 import { expressjwt } from "express-jwt";
-import { env } from "../../lib/env";
+import { env } from "../../../lib/env";
 import cors from "cors";
 
 const server = express();
@@ -21,12 +21,12 @@ const server = express();
 //       return undefined;
 //     }
 // }).unless({ path: ["/login", "/login-adm", "/webhook-hotmart"] })
-  
+
 server.use(cors({ origin: "*", methods: ["GET", "POST", "PUT", "DELETE"] }));
 
 server.use(express.json());
 
 // server.use(jwtMiddleware);
-  
+
 
 export { server };

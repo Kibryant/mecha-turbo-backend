@@ -1,4 +1,4 @@
-interface DataWebhookHotmart {
+interface WebhookHotmartRequestDto {
     data: {
         buyer: {
             name: string;
@@ -8,4 +8,4 @@ interface DataWebhookHotmart {
     }
 }
 
-export { DataWebhookHotmart }
+export { WebhookHotmartRequestDto };
