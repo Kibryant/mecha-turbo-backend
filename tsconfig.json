@@ -1,13 +1,20 @@
 {
-  "compilerOptions": {
-    "lib": ["ES2023"],
-    "module": "node16",
-    "target": "ES2022",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "outDir": "./dist",
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+    "compilerOptions": {
+        "lib": [
+            "ES2023"
+        ],
+        "module": "node16",
+        "target": "ES2022",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "outDir": "./dist",
+    },
+    "include": [
+        "src/**/*",
+        "tsconfig.scripts.json"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
 }
