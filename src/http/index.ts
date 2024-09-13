@@ -14,7 +14,8 @@ import { env } from "../lib/env";
 const jwtMiddleware = expressjwt({
     secret: env.JWT_SECRET_KEY || "",
     algorithms: ["HS256"],
-    // @ts-expect-error - The types are wrong
+
+    // @ts-ignore - The types are wrong
     getToken: (req) => {
         if (
             req.headers.authorization &&
@@ -34,7 +35,7 @@ server.use(express.json());
 
 server.use(jwtMiddleware);
 
-const MONGODB_URI = env.MONGODB_URI || "";
+const MONGODB_URI = env.MONGODB_URI
 
 connect(MONGODB_URI).then(() => {
     console.log("Connected to MongoDB");
@@ -197,11 +198,45 @@ server.post("/login-adm", async (req, res) => {
 });
 
 server.get("/users", async (req, res) => {
-    const users = await userModel.find();
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.per_page as string) || 10;
 
-    console.log(req.headers.authorization)
+    try {
 
-    res.json({ users, status: HttpStatusCode.OK });
+        const totalUsers = await userModel.countDocuments();
+
+
+        const totalPages = Math.ceil(totalUsers / Number(limit));
+
+
+        if (Number(page) > totalPages) {
+            return res.json({
+                message: "Página não encontrada.",
+                status: HttpStatusCode.NOT_FOUND,
+            });
+        }
+
+        const skip = (Number(page) - 1) * Number(limit);
+
+        const users = await userModel.find()
+            .skip(skip)
+            .limit(Number(limit))
+            .sort({ purchaseDate: 1 });
+
+        res.json({
+            users,
+            currentPage: Number(page),
+            totalPages,
+            totalUsers,
+            status: HttpStatusCode.OK
+        });
+    } catch (error) {
+
+        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+            error: 'Erro ao buscar usuários',
+            status: HttpStatusCode.INTERNAL_SERVER_ERROR
+        });
+    }
 });
 
 server.post("/add-user", async (req, res) => {
