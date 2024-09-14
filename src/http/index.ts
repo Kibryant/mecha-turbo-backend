@@ -221,7 +221,7 @@ server.get("/users", async (req, res) => {
         const users = await userModel.find()
             .skip(skip)
             .limit(Number(limit))
-            .sort({ purchaseDate: 1 });
+            .sort({ purchaseDate: -1 });
 
         res.json({
             users,
