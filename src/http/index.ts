@@ -55,7 +55,7 @@ server.post("/webhook-hotmart", async (req, res) => {
 
     const { buyer } = data;
 
-    const { name, email, checkout_phone } = buyer;
+    const { name, email } = buyer;
 
     const purchaseDate = new Date()
 
@@ -63,15 +63,12 @@ server.post("/webhook-hotmart", async (req, res) => {
         new Date().setFullYear(new Date().getFullYear() + 1)
     )
 
-    console.log(name, email, checkout_phone, purchaseDate, expirationDate);
-
     try {
-        const hashedPassword = await hash(checkout_phone);
 
         const newUser = await userModel.create({
             name,
             email,
-            password: hashedPassword,
+            password: "123456",
             purchaseDate,
             expirationDate,
         });
