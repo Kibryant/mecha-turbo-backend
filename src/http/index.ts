@@ -191,6 +191,7 @@ server.get("/users", async (req, res) => {
 
     if (!page || !limit) {
         const users = await userModel.find()
+        .limit(20)
         .sort({ purchaseDate: -1 });
 
         res.json({
