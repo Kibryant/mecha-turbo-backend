@@ -7,6 +7,7 @@ const envSchema = z.object({
   MONGODB_URI: z.string(),
   JWT_SECRET_KEY: z.string(),
   HOTMART_HOTTOK: z.string(),
+  SECRET_PASSWORD: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

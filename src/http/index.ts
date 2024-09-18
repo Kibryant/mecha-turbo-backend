@@ -22,9 +22,11 @@ const jwtMiddleware = expressjwt({
             req.headers.authorization.split(" ")[0] === "Bearer"
         ) {
             return req.headers.authorization.split(" ")[1];
-        } else if (req.query && req.query.token) {
+        } 
+        if (req.query?.token) {
             return req.query.token;
         }
+        
         return null;
     }
 }).unless({ path: ["/login", "/login-adm", "/webhook-hotmart"] })
@@ -68,7 +70,7 @@ server.post("/webhook-hotmart", async (req, res) => {
         const newUser = await userModel.create({
             name,
             email,
-            password: "123456",
+            password: env.SECRET_PASSWORD,
             purchaseDate,
             expirationDate,
         });
