@@ -8,7 +8,7 @@ import { HttpStatusCode } from "../types/http-status-code";
 import { compareHash, hash } from "../lib/hash";
 import jwt from "jsonwebtoken";
 import { expressjwt } from "express-jwt";
-import { DataWebhookHotmart } from "../types/data-webhook-hotmart";
+import type { DataWebhookHotmart } from "../types/data-webhook-hotmart";
 import { env } from "../lib/env";
 
 const jwtMiddleware = expressjwt({
@@ -198,8 +198,17 @@ server.post("/login-adm", async (req, res) => {
 });
 
 server.get("/users", async (req, res) => {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.per_page as string) || 10;
+    const page = Number.parseInt(req.query.page as string)
+    const limit = Number.parseInt(req.query.per_page as string)
+
+    if (!page || !limit) {
+        const users = await userModel.find()
+        .sort({ purchaseDate: -1 });
+
+        res.json({
+            users,
+        });
+    }
 
     try {
 
