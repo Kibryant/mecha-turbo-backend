@@ -109,16 +109,7 @@ server.post("/login", async (req, res) => {
             });
             return;
         }
-
-        const isValidPassword = await compareHash(password, user.password);
-
-        if (!isValidPassword) {
-            return res.json({
-                message: "Credências Inválidas.",
-                status: HttpStatusCode.UNAUTHORIZED,
-            });
-        }
-
+        
         res.json({
             message: "Usuário logado com sucesso.",
             status: HttpStatusCode.OK,

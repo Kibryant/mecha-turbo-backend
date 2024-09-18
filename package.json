@@ -7,7 +7,7 @@
         "dev": "tsx watch src/http/index.ts",
         "build": "tsc",
         "start": "node dist/http/index.js",
-        "script": "tsx --env-file .env ./scripts/change-expiration-date"
+        "script": "tsx --env-file .env ./scripts/change-password"
     },
     "keywords": [],
     "author": "",
