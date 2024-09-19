@@ -230,7 +230,9 @@ server.get("/users", async (req, res) => {
             totalPages,
             totalUsers,
             status: HttpStatusCode.OK,
-            hasMore: Number(page) < totalPages
+            hasMore: Number(page) < totalPages,
+            nextPage: Number(page) + 1,
+            prevPage: Number(page) - 1
         });
     } catch (error) {
 
