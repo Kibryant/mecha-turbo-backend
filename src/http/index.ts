@@ -198,6 +198,7 @@ server.get("/users", async (req, res) => {
 
         res.json({
             users,
+            status: HttpStatusCode.OK        
         });
     }
 
@@ -228,7 +229,8 @@ server.get("/users", async (req, res) => {
             currentPage: Number(page),
             totalPages,
             totalUsers,
-            status: HttpStatusCode.OK
+            status: HttpStatusCode.OK,
+            hasMore: Number(page) < totalPages
         });
     } catch (error) {
 
@@ -335,7 +337,6 @@ server.put("/update-admin", async (req, res) => {
 
     res.json({ message: "Administrador atualizado com sucesso!", status: HttpStatusCode.OK });
 });
-
 
 server.listen(3333, () => {
     console.log("Server listening on port 3333");
