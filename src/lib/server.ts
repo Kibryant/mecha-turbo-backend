@@ -1,5 +1,5 @@
-import express from "express";
+import express from 'express'
 
-const server = express();
+const server = express()
 
-export { server };
+export { server }

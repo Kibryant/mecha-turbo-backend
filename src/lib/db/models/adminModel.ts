@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
-const { Schema } = mongoose;
+const { Schema } = mongoose
 
 const adminSchema = new Schema(
   {
@@ -8,10 +8,9 @@ const adminSchema = new Schema(
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
   },
-  { timestamps: true, collection: "admin" },
-);
+  { timestamps: true, collection: 'admin' }
+)
 
-const adminModel =
-  mongoose.models.admin || mongoose.model("admin", adminSchema);
+const adminModel = mongoose.models.admin || mongoose.model('admin', adminSchema)
 
-export default adminModel;
+export default adminModel

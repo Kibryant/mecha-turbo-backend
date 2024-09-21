@@ -1,15 +1,15 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose'
 
 async function connect(MONGODB_URI: string) {
   try {
-    const opts = {};
+    const opts = {}
 
-    const connection = await mongoose.connect(MONGODB_URI, opts);
+    const connection = await mongoose.connect(MONGODB_URI, opts)
 
-    return connection;
+    return connection
   } catch (error) {
-    console.log(error);
+    console.log(error)
   }
 }
 
-export { connect };
+export { connect }
