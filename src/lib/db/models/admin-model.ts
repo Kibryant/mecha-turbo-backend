@@ -11,6 +11,6 @@ const adminSchema = new Schema(
   { timestamps: true, collection: 'admin' }
 )
 
-const adminModel = mongoose.models.admin || mongoose.model('admin', adminSchema)
+const AdminModel = mongoose.models.admin || mongoose.model('admin', adminSchema)
 
-export default adminModel
+export default AdminModel

@@ -2,6 +2,8 @@ import mongoose from 'mongoose'
 
 const { Schema } = mongoose
 
+const THIRTY_DAYS_IN_SECOND = 2592000
+
 const userSchema = new Schema(
   {
     name: { type: String, required: true },
@@ -18,8 +20,11 @@ const userSchema = new Schema(
   { timestamps: true, collection: 'user' }
 )
 
-userSchema.index({ expirationDate: 1 }, { expireAfterSeconds: 0 })
+userSchema.index(
+  { expirationDate: 1 },
+  { expireAfterSeconds: THIRTY_DAYS_IN_SECOND }
+)
 
-const userModel = mongoose.models.User || mongoose.model('User', userSchema)
+const UserModel = mongoose.models.User || mongoose.model('User', userSchema)
 
-export default userModel
+export default UserModel

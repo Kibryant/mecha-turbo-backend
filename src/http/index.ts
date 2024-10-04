@@ -1,9 +1,9 @@
 import cors from 'cors'
 import { connect } from '../lib/db/connect'
-import userModel from '../lib/db/models/userModel'
+import UserModel from '../lib/db/models/user-model'
 import { server } from '../lib/server'
 import express from 'express'
-import adminModel from '../lib/db/models/adminModel'
+import AdminModel from '../lib/db/models/admin-model'
 import { HttpStatusCode } from '../types/http-status-code'
 import { compareHash, hash } from '../lib/hash'
 import jwt from 'jsonwebtoken'
@@ -63,7 +63,7 @@ server.post('/webhook-hotmart', async (req, res) => {
   )
 
   try {
-    const newUser = await userModel.create({
+    const newUser = await UserModel.create({
       name,
       email,
       password: env.SECRET_PASSWORD,
@@ -93,7 +93,7 @@ server.post('/login', async (req, res) => {
   const { email, password } = req.body
 
   try {
-    const user = await userModel.findOne({ email })
+    const user = await UserModel.findOne({ email })
 
     if (!user) {
       res.json({
@@ -131,7 +131,7 @@ server.post('/login-adm', async (req, res) => {
   const { email, password, accessCode } = req.body
 
   try {
-    const admin = await adminModel.findOne({ email })
+    const admin = await AdminModel.findOne({ email })
 
     if (!admin) {
       res.json({
@@ -186,7 +186,7 @@ server.get('/users', async (req, res) => {
   const limit = Number.parseInt(req.query.per_page as string)
 
   if (!page || !limit) {
-    const users = await userModel.find().limit(20).sort({ purchaseDate: -1 })
+    const users = await UserModel.find().limit(20).sort({ purchaseDate: -1 })
 
     res.json({
       users,
@@ -195,7 +195,7 @@ server.get('/users', async (req, res) => {
   }
 
   try {
-    const totalUsers = await userModel.countDocuments()
+    const totalUsers = await UserModel.countDocuments()
 
     const totalPages = Math.ceil(totalUsers / Number(limit))
 
@@ -208,8 +208,7 @@ server.get('/users', async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit)
 
-    const users = await userModel
-      .find()
+    const users = await UserModel.find()
       .skip(skip)
       .limit(Number(limit))
       .sort({ purchaseDate: -1 })
@@ -238,7 +237,7 @@ server.post('/add-user', async (req, res) => {
   try {
     const hashedPassword = await hash(password)
 
-    const newUser = await userModel.create({
+    const newUser = await UserModel.create({
       name,
       email,
       password: hashedPassword,
@@ -267,7 +266,7 @@ server.post('/add-user', async (req, res) => {
 server.delete('/delete-user/:id', async (req, res) => {
   const { id } = req.params
 
-  await userModel.findByIdAndDelete(id)
+  await UserModel.findByIdAndDelete(id)
 
   res.status(HttpStatusCode.NO_CONTENT).json()
 })
@@ -276,7 +275,7 @@ server.put('/update-user/:id', async (req, res) => {
   const { id } = req.params
   const { name, email, purchaseDate, expirationDate } = req.body
 
-  const user = await userModel.findById(id)
+  const user = await UserModel.findById(id)
 
   if (!user) {
     return res.json({
@@ -301,7 +300,7 @@ server.put('/update-admin', async (req, res) => {
   let hashedPassword: string | null = null
   let hashedAccessCode: string | null = null
 
-  const admin = await adminModel.findOne({ email: oldEmail })
+  const admin = await AdminModel.findOne({ email: oldEmail })
 
   if (!admin) {
     return res.json({
