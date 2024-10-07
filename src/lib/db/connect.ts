@@ -8,7 +8,7 @@ async function connect(MONGODB_URI: string) {
 
     return connection
   } catch (error) {
-    console.log(error)
+    throw new Error("Couldn't connect to the database.")
   }
 }
 
