@@ -56,6 +56,7 @@ userRouter.get('/users', async (req, res) => {
     })
   }
 })
+
 userRouter.post('/login', validateLogin, async (req, res) => {
   const { email } = req.body
 
@@ -101,7 +102,7 @@ userRouter.post('/add-user', validateUser, async (req, res) => {
     const userExists = await UserModel.findOne({ email })
 
     if (userExists) {
-      return res.status(HttpStatusCode.BAD_REQUEST).json({
+      return res.status(HttpStatusCode.CONFLICT).json({
         message: 'Usuário já existe.',
       })
     }
