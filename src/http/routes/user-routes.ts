@@ -57,7 +57,7 @@ userRouter.get('/users', async (req, res) => {
   }
 })
 userRouter.post('/login', validateLogin, async (req, res) => {
-  const { email, password } = req.body
+  const { email } = req.body
 
   try {
     const user = await UserModel.findOne({ email })
@@ -70,7 +70,7 @@ userRouter.post('/login', validateLogin, async (req, res) => {
       return
     }
 
-    res.json({
+    res.status(HttpStatusCode.OK).json({
       message: 'Usuário logado com sucesso.',
       status: HttpStatusCode.OK,
       user: {
