@@ -8,41 +8,54 @@ import { validateLogin } from '../validators/login-validaor'
 const userRouter = Router()
 
 userRouter.get('/users', async (req, res) => {
-  const page = Number(req.query.page) || 1
-  const limit = Number(req.query.per_page) || 20
+  const page = Number.parseInt(req.query.page as string)
+  const limit = Number.parseInt(req.query.per_page as string)
+
+  if (!page || !limit) {
+    const users = await UserModel.find().limit(20).sort({ purchaseDate: -1 })
+
+    res.json({
+      users,
+      status: HttpStatusCode.OK,
+    })
+  }
 
   try {
     const totalUsers = await UserModel.countDocuments()
-    const totalPages = Math.ceil(totalUsers / limit)
-    const skip = (page - 1) * limit
 
-    if (page > totalPages) {
-      return res
-        .status(HttpStatusCode.NOT_FOUND)
-        .json({ message: 'Página não encontrada.' })
+    const totalPages = Math.ceil(totalUsers / Number(limit))
+
+    if (Number(page) > totalPages) {
+      return res.json({
+        message: 'Página não encontrada.',
+        status: HttpStatusCode.NOT_FOUND,
+      })
     }
+
+    const skip = (Number(page) - 1) * Number(limit)
 
     const users = await UserModel.find()
       .skip(skip)
-      .limit(limit)
+      .limit(Number(limit))
       .sort({ purchaseDate: -1 })
 
-    res.status(HttpStatusCode.OK).json({
+    res.json({
       users,
-      currentPage: page,
+      currentPage: Number(page),
       totalPages,
       totalUsers,
-      hasMore: page < totalPages,
-      nextPage: page < totalPages ? page + 1 : null,
-      prevPage: page > 1 ? page - 1 : null,
+      status: HttpStatusCode.OK,
+      hasMore: Number(page) < totalPages,
+      nextPage: Number(page) + 1,
+      prevPage: Number(page) - 1,
     })
-  } catch {
+  } catch (error) {
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-      message: 'Erro ao buscar usuários',
+      error: 'Erro ao buscar usuários',
+      status: HttpStatusCode.INTERNAL_SERVER_ERROR,
     })
   }
 })
-
 userRouter.post('/login', validateLogin, async (req, res) => {
   const { email, password } = req.body
 
