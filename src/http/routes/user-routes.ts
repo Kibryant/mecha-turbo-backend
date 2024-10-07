@@ -105,7 +105,9 @@ userRouter.post('/add-user', validateUser, async (req, res) => {
 
     await newUser.save()
 
-    res.status(HttpStatusCode.CREATED).json({ user: newUser })
+    res
+      .status(HttpStatusCode.CREATED)
+      .json({ user: newUser, status: HttpStatusCode.CREATED })
   } catch (error) {
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
       message: 'Erro ao criar usuário',

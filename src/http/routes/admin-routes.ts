@@ -20,13 +20,19 @@ adminRouter.post('/login-adm', validateAdminLogin, async (req, res) => {
     ) {
       return res
         .status(HttpStatusCode.UNAUTHORIZED)
-        .json({ message: 'Credenciais inválidas.' })
+        .json({
+          message: 'Credenciais inválidas.',
+          status: HttpStatusCode.UNAUTHORIZED,
+        })
     }
 
     const token = jwt.sign({ email }, env.JWT_SECRET_KEY)
-    res
-      .status(HttpStatusCode.OK)
-      .json({ message: 'Administrador logado com sucesso.', token })
+
+    res.status(HttpStatusCode.OK).json({
+      message: 'Administrador logado com sucesso.',
+      token,
+      status: HttpStatusCode.OK,
+    })
   } catch (error) {
     res
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
