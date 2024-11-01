@@ -18,11 +18,14 @@ webhookRouter.post('/webhook-hotmart', async (req, res) => {
 
   const { data }: DataWebhookHotmart = req.body
 
-  const { buyer } = data
+  const {
+    buyer,
+    purchase: { approved_date },
+  } = data
 
   const { name, email } = buyer
 
-  const purchaseDate = new Date()
+  const purchaseDate = new Date(approved_date)
 
   const expirationDate = new Date(
     new Date().setFullYear(new Date().getFullYear() + 1)
