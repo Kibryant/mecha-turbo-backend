@@ -7,7 +7,7 @@
         "dev": "tsx watch src/http/index.ts",
         "build": "tsc",
         "start": "node dist/http/index.js",
-        "script": "tsx --env-file .env ./scripts/add-user-hand.ts"
+        "script": "tsx --env-file .env ./scripts/fix-purchase-date.ts"
     },
     "keywords": [],
     "author": "",
