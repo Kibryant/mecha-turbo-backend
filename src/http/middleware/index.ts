@@ -20,4 +20,6 @@ export const jwtMiddleware = expressjwt({
   secret: env.JWT_SECRET_KEY,
   algorithms: ['HS256'],
   getToken,
-}).unless({ path: ['/login', '/login-adm', '/webhook-hotmart'] })
+}).unless({
+  path: ['/login', '/login-adm', '/webhook-hotmart', '/webhook-hotmart-latam'],
+})
