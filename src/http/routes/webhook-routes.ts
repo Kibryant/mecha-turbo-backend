@@ -28,7 +28,7 @@ webhookRouter.post('/webhook-hotmart', async (req, res) => {
   const purchaseDate = new Date(approved_date)
 
   const expirationDate = new Date(
-    new Date().setFullYear(new Date().getFullYear() + 1)
+    purchaseDate.setFullYear(new Date().getFullYear() + 1)
   )
 
   try {
