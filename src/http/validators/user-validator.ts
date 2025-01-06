@@ -6,9 +6,9 @@ export const validateUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { name, email, password, purchaseDate, expirationDate } = req.body
+  const { name, email, purchaseDate, expirationDate } = req.body
 
-  if (!name || !email || !password || !purchaseDate || !expirationDate) {
+  if (!name || !email || !purchaseDate || !expirationDate) {
     return res.status(HttpStatusCode.BAD_REQUEST).json({
       message: 'Parâmetros inválidos.',
     })
@@ -23,12 +23,6 @@ export const validateUser = async (
   if (typeof email !== 'string' || !email.includes('@')) {
     return res.status(HttpStatusCode.BAD_REQUEST).json({
       message: 'Email inválido.',
-    })
-  }
-
-  if (typeof password !== 'string' || password.length < 6) {
-    return res.status(HttpStatusCode.BAD_REQUEST).json({
-      message: 'Senha inválida.',
     })
   }
 
