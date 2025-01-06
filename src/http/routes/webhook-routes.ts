@@ -25,12 +25,12 @@ webhookRouter.post('/webhook-hotmart', async (req, res) => {
 
   const { name, email } = buyer
 
-  const purchaseDate = new Date(approved_date)
+  const purchaseDate = new Date(approved_date);
 
-  const expirationDate = new Date(
-    purchaseDate.setFullYear(new Date().getFullYear() + 1)
-  )
+  const expirationDate = new Date(purchaseDate);
 
+  expirationDate.setFullYear(purchaseDate.getFullYear() + 1);
+  
   try {
     const userExists = await UserModel.findOne({ email })
 
