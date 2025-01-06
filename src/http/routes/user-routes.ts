@@ -4,6 +4,7 @@ import { HttpStatusCode } from '../../types/http-status-code'
 import UserModel from '../../lib/db/models/user-model'
 import { hash } from '../../lib/hash'
 import { validateLogin } from '../validators/login-validaor'
+import { env } from '../../lib/env'
 
 const userRouter = Router()
 
@@ -96,7 +97,7 @@ userRouter.post('/login', validateLogin, async (req, res) => {
 })
 
 userRouter.post('/add-user', validateUser, async (req, res) => {
-  const { name, email, password, purchaseDate, expirationDate } = req.body
+  const { name, email, purchaseDate, expirationDate } = req.body
 
   try {
     const userExists = await UserModel.findOne({ email })
@@ -107,12 +108,10 @@ userRouter.post('/add-user', validateUser, async (req, res) => {
       })
     }
 
-    const hashedPassword = await hash(password)
-
     const newUser = new UserModel({
       name,
       email,
-      password: hashedPassword,
+      password: env.SECRET_PASSWORD,
       purchaseDate,
       expirationDate,
     })
