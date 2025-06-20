@@ -7,11 +7,20 @@ import UserModel from '../../lib/db/models/user-model'
 const webhookRouter = Router()
 
 webhookRouter.post('/webhook-hotmart', async (req, res) => {
+  const hotmartReceivedHottok = req.headers['x-hotmart-hottok']
+
+  if (hotmartReceivedHottok !== env.HOTMART_HOTTOK) {
+    return res.status(HttpStatusCode.UNAUTHORIZED).json({
+      message: 'Hottok inválido.',
+      status: HttpStatusCode.UNAUTHORIZED,
+    })
+  }
+
   const { data }: DataWebhookHotmart = req.body
 
   const {
-    customer: buyer,
-    created_at: approved_date,
+    buyer,
+    purchase: { approved_date },
   } = data
 
   const { name, email } = buyer
@@ -63,12 +72,18 @@ webhookRouter.post('/webhook-hotmart', async (req, res) => {
 webhookRouter.post('/webhook-hotmart-latam', async (req, res) => {
   const hotmartReceivedHottok = req.headers['x-hotmart-hottok']
 
+  if (hotmartReceivedHottok !== env.HOTMART_HOTTOK_LATAM) {
+    return res.status(HttpStatusCode.UNAUTHORIZED).json({
+      message: 'Hottok inválido.',
+      status: HttpStatusCode.UNAUTHORIZED,
+    })
+  }
 
   const { data }: DataWebhookHotmart = req.body
 
   const {
-    customer: buyer,
-    created_at: approved_date,
+    buyer,
+    purchase: { approved_date },
   } = data
 
   const { name, email } = buyer
