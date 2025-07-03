@@ -188,9 +188,6 @@ webhookRouter.post('/webhook-pagarme', async (req, res) => {
 })
 
 webhookRouter.post('/webhook-pagarme-latam', async (req, res) => {
-  const hotmartReceivedHottok = req.headers['x-hotmart-hottok']
-
-
   const { data }: DataWebhookPagarme = req.body
 
   const {
@@ -243,6 +240,5 @@ webhookRouter.post('/webhook-pagarme-latam', async (req, res) => {
     })
   }
 })
-
 
 export default webhookRouter
