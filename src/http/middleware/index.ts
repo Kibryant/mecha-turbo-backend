@@ -21,5 +21,5 @@ export const jwtMiddleware = expressjwt({
   algorithms: ['HS256'],
   getToken,
 }).unless({
-  path: ['/login', '/login-adm', '/webhook-hotmart', '/webhook-hotmart-latam'],
+  path: ['/login', '/login-adm', '/webhook-hotmart', '/webhook-hotmart-latam', 'webhook-pagarme', 'webhook-pagarme-latam'],
 })
